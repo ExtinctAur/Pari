@@ -2,26 +2,22 @@
 <html lang="en">
 <head>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
 
-<script>
-  // Your Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyCcdppTg2pJc9c0iOig_Hp6pDIDAL6_Kjs",
-  authDomain: "pari-ca0b5.firebaseapp.com",
-  projectId: "pari-ca0b5",
-  storageBucket: "pari-ca0b5.firebasestorage.app",
-  messagingSenderId: "426313475739",
-  appId: "1:426313475739:web:adcb0eb1570a593b62483e",
-  measurementId: "G-Y5TJF6Z0MK"
-};
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCcdppTg2pJc9c0iOig_Hp6pDIDAL6_Kjs",
+      authDomain: "pari-ca0b5.firebaseapp.com",
+      projectId: "pari-ca0b5",
+      storageBucket: "pari-ca0b5.firebasestorage.app",
+      messagingSenderId: "426313475739",
+      appId: "1:426313475739:web:adcb0eb1570a593b62483e",
+      measurementId: "G-Y5TJF6Z0MK"
+    };
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-
-  // Get Firestore
-  const db = firebase.firestore();
-</script>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bubble Pop Showdown</title>
@@ -87,21 +83,29 @@ const firebaseConfig = {
     let spawnInterval = 1000;
     let bubbleSpeed = 1.0;
 
-    const currentUser = localStorage.getItem("loggedInUser") || "Pari";
-    let sharvilScore = parseInt(localStorage.getItem("highscore_Sharvil")) || 0;
-    let pariScore = parseInt(localStorage.getItem("highscore_Pari")) || 0;
+    const currentUser = localStorage.getItem("currentUser") || "pari";
+    let currentUserDocRef = db.collection("users").doc(currentUser);
+    let opponent = currentUser === "pari" ? "sharvil" : "pari";
+    let currentTokens = 0;
+    let currentHigh = 0;
+    let opponentHigh = 0;
+
+    async function loadScores() {
+      const userDoc = await currentUserDocRef.get();
+      const oppDoc = await db.collection("users").doc(opponent).get();
+
+      currentHigh = userDoc.exists ? (userDoc.data().highscore || 0) : 0;
+      currentTokens = userDoc.exists ? (userDoc.data().tokens || 0) : 0;
+      opponentHigh = oppDoc.exists ? (oppDoc.data().highscore || 0) : 0;
+
+      updateScoreboard(currentUser, currentHigh, opponentHigh);
+    }
 
     function updateScoreboard(player, playerScore, opponentScore) {
       document.getElementById("current-player").textContent = player;
       document.getElementById("your-highscore").textContent = playerScore;
-      document.getElementById("opponent-name").textContent = player === "Pari" ? "Sharvil" : "Pari";
+      document.getElementById("opponent-name").textContent = opponent;
       document.getElementById("opponent-highscore").textContent = opponentScore;
-    }
-
-    if (currentUser === "Pari") {
-      updateScoreboard("Pari", pariScore, sharvilScore);
-    } else {
-      updateScoreboard("Sharvil", sharvilScore, pariScore);
     }
 
     function spawnBubble() {
@@ -152,7 +156,7 @@ const firebaseConfig = {
       }
     }
 
-    function endGame() {
+    async function endGame() {
       gameOver = true;
       ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -161,20 +165,17 @@ const firebaseConfig = {
       ctx.textAlign = 'center';
       ctx.fillText(`Game Over! Score: ${score}`, canvas.width / 2, canvas.height / 2);
 
-      if (currentUser === "Pari" && score > sharvilScore) {
-        let tokens = parseInt(localStorage.getItem("pariTokens")) || 0;
-        tokens++;
-        localStorage.setItem("pariTokens", tokens);
+      if (currentUser === "pari" && score > opponentHigh) {
+        currentTokens++;
         alert("You beat Sharvil's score! You earned 1 wish token!");
       }
 
-      if (currentUser === "Pari" && score > pariScore) {
-        localStorage.setItem("highscore_Pari", score);
-        updateScoreboard("Pari", score, sharvilScore);
-      }
-      if (currentUser === "Sharvil" && score > sharvilScore) {
-        localStorage.setItem("highscore_Sharvil", score);
-        updateScoreboard("Sharvil", score, pariScore);
+      if (score > currentHigh) {
+        await currentUserDocRef.set({
+          highscore: score,
+          tokens: currentTokens
+        }, { merge: true });
+        updateScoreboard(currentUser, score, opponentHigh);
       }
     }
 
@@ -194,6 +195,7 @@ const firebaseConfig = {
       }
     }, spawnInterval);
 
+    loadScores();
     gameLoop();
   </script>
 </body>
