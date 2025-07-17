@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wish Tokens</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #ffe0ec, #c2e9fb);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      text-align: center;
+      padding: 2rem;
+      background-color: #ff69b4;
+      color: white;
+      font-size: 2rem;
+    }
+    #wish-section {
+      padding: 2rem;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .token-display {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #e91e63;
+      margin-bottom: 2rem;
+    }
+    .wish {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .wish button {
+      padding: 0.5rem 1rem;
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>Wish Tokens 🎁</header>
+  <div id="wish-section">
+    <div class="token-display">You have <span id="token-count">0</span> tokens 💰</div>
+    <div id="wish-list"></div>
+  </div>
+  <script>
+    const wishes = [
+      { name: "Back Massage", cost: 1 },
+      { name: "Foot Rub", cost: 1 },
+      { name: "One Free Kiss Anywhere 😉", cost: 2 },
+      { name: "You Choose My Outfit For The Day", cost: 1 },
+      { name: "Movie Night In Your Arms 🍿", cost: 1 },
+      { name: "A Long, Hot Makeout Session", cost: 2 },
+      { name: "You Get To Cuddle Me To Sleep 🛏️", cost: 1 },
+      { name: "Send You A Hot Pic 📸", cost: 3 },
+      { name: "Voice Note Moaning Your Name 😈", cost: 4 },
+      { name: "Private Video Just For You", cost: 6 },
+      { name: "Wet Look Selfie 📷", cost: 3 },
+      { name: "Slow Striptease Clip", cost: 6 },
+      { name: "Spicy POV Kiss Video", cost: 5 },
+      { name: "Secret Snapchat Video", cost: 4 },
+      { name: "Mirror Pic In Your Fav Outfit", cost: 3 },
+      { name: "I Recreate Your Fantasy In Pics", cost: 6 },
+      { name: "Voice Recording Saying 'Good Girl' Repeatedly", cost: 3 },
+      { name: "Lingerie Gallery (5 Pics)", cost: 7 },
+      { name: "Send A Dirty Voice Message", cost: 4 },
+      { name: "Whisper Your Name In Bed Video", cost: 5 },
+      { name: "Lick Lips In Slowmo Video", cost: 3 },
+      { name: "Send Naughty Texts For 1 Hour", cost: 3 },
+      { name: "You Get To Choose My Underwear For A Day", cost: 2 },
+      { name: "Suggest A Pose — I’ll Send A Pic", cost: 4 },
+      { name: "Booty Pic In Shorts", cost: 3 },
+      { name: "You Pick The Theme, I Send The Vibe", cost: 4 },
+      { name: "Spank Vid (Your Name Included)", cost: 6 },
+      { name: "I Rate Your Pics, Brutally 😈", cost: 2 },
+      { name: "Back Arch Pose Pic", cost: 3 },
+      { name: "My Morning Voice Saying Your Name", cost: 3 },
+      { name: "Blow A Kiss On Cam", cost: 2 },
+      { name: "One Day Sexting Marathon", cost: 5 },
+      { name: "Pick A Dare, I Send Proof Pic", cost: 4 },
+      { name: "You Get A Dirty Drawing By Me ✍️", cost: 4 },
+      { name: "Topless Tease (Censored) 😳", cost: 6 },
+      { name: "Ask Me Anything (No Filter Edition)", cost: 3 },
+      { name: "Describe A Hot Dream I Had About You", cost: 2 },
+      { name: "Selfie While Moaning Your Name", cost: 5 },
+      { name: "Make A Lip Bite Compilation", cost: 4 },
+      { name: "Write Your Name On Me Somewhere Naughty", cost: 4 },
+      { name: "Send A Shower Pic With Caption", cost: 5 },
+      { name: "Act Like Your Girlfriend In A Voice Call (Spicy)", cost: 5 },
+      { name: "Create A NSFW Secret Pinterest Board", cost: 2 },
+      { name: "Play Truth Or Dare With You (Naughty Mode)", cost: 4 },
+      { name: "Describe My Favorite NSFW Memory With You", cost: 2 },
+      { name: "Pretend You’re Here: Describe What I’d Do", cost: 3 },
+      { name: "Seductive Lip Sync Video", cost: 3 },
+      { name: "Whisper Your Kinks In Audio", cost: 4 },
+      { name: "Mouth Close-Up + Wink 😘", cost: 2 },
+      { name: "Choose A Word, I Use It In A Dirty Sentence", cost: 2 },
+{ name: "Breakfast In Bed 🍳", cost: 1 },
+{ name: "Sing A Song Just For You 🎶", cost: 2 },
+{ name: "Virtual Karaoke Night 🎤", cost: 2 },
+{ name: "Write A Poem About You ✍️", cost: 1 },
+{ name: "Design A Custom Lock Screen For You 📱", cost: 2 },
+{ name: "One Page From My Diary 📝", cost: 3 },
+{ name: "Doodle You In My Notebook 🎨", cost: 2 },
+{ name: "Write You A Cheesy Love Letter 💌", cost: 1 },
+{ name: "Make A Playlist For You 🎧", cost: 1 },
+{ name: "Write Down 10 Things I Love About You 💕", cost: 2 },
+{ name: "One Wish Granted (Non-Spicy)", cost: 3 },
+{ name: "Video Message Just Saying How Much I Love You 🥹", cost: 2 },
+{ name: "Pick My Insta Caption For A Day 📸", cost: 1 },
+{ name: "Bake Something And Dedicate It To You 🍪", cost: 3 },
+{ name: "Send You A Cute Good Morning Video 🌞", cost: 2 },
+{ name: "A Day Where I Spoil You Rotten 🎁", cost: 4 },
+{ name: "Design A Digital Collage Of Us", cost: 3 },
+{ name: "Let You Pick What We Watch 🎬", cost: 1 },
+{ name: "1 Minute Hug IRL (Extended Edition)", cost: 1 },
+{ name: "Tell You A Secret 😳", cost: 2 },
+{ name: "Send A Childhood Photo With A Story", cost: 2 },
+{ name: "Draw A Stick Figure Comic About Us 🖍️", cost: 1 },
+{ name: "Let You Pick My Nickname For A Day 😅", cost: 1 },
+{ name: "Make A Fake Movie Poster About Us 🎥", cost: 3 },
+{ name: "Send You A Happy Crying Video (Guaranteed Emotion)", cost: 2 },
+{ name: "Tell You My Top 5 Favorite Memories With You 🌈", cost: 2 },
+{ name: "Plan Our Future Home On Paper 🏡", cost: 3 },
+{ name: "Sing Your Favorite Cringe Song With Feeling 😂", cost: 2 },
+{ name: "A Cute Hand-Made Coupon For Anything 💳", cost: 1 },
+{ name: "Make A List Of Baby Names I'd Want With You 👶", cost: 2 }
+
+    ];
+
+    const container = document.getElementById("wish-list");
+    let tokenCount = parseInt(localStorage.getItem("pariTokens")) || 0;
+    document.getElementById("token-count").textContent = tokenCount;
+
+    wishes.forEach((wish, index) => {
+      const div = document.createElement("div");
+      div.className = "wish";
+      div.innerHTML = `
+        <div><strong>${wish.name}</strong><br>Cost: ${wish.cost} tokens</div>
+        <button onclick="redeem('${wish.name}', ${wish.cost})">Redeem</button>
+      `;
+      container.appendChild(div);
+    });
+
+    function redeem(name, cost) {
+      if (tokenCount >= cost) {
+        tokenCount -= cost;
+        document.getElementById("token-count").textContent = tokenCount;
+        localStorage.setItem("pariTokens", tokenCount);
+
+        const log = JSON.parse(localStorage.getItem("redemptionLog")) || [];
+        const date = new Date().toLocaleString();
+        log.push({ wish: name, cost: cost, date: date });
+        localStorage.setItem("redemptionLog", JSON.stringify(log));
+
+        alert(`You redeemed "${name}"! Get ready 😏`);
+      } else {
+        alert("Not enough tokens, try the admin for a top-up! 🙃");
+      }
+    }
+  </script>
+</body>
+</html>

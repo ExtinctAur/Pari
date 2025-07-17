@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bubble Pop Showdown</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom right, #ff9a9e, #fad0c4);
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background-color: #fff;
+      border-bottom: 4px solid #ff69b4;
+    }
+    #scoreboard {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+    .score-block {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .score-block h3 {
+      margin: 0 0 0.5rem;
+      color: #e91e63;
+    }
+    .score-block p {
+      font-size: 1.2rem;
+      margin: 0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="1000" height="640"></canvas>
+  <div id="scoreboard">
+    <div class="score-block" id="player-block">
+      <h3>You: <span id="current-player">Player</span></h3>
+      <p>Live Score: <span id="live-score">0</span></p>
+      <p>High Score: <span id="your-highscore">0</span></p>
+    </div>
+    <div class="score-block" id="opponent-block">
+      <h3>Opponent: <span id="opponent-name">Opponent</span></h3>
+      <p>High Score: <span id="opponent-highscore">0</span></p>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let bubbles = [];
+    let score = 0;
+    let gameOver = false;
+    let spawnInterval = 1500;
+    let bubbleSpeed = 1.2;
+
+    const currentUser = localStorage.getItem("loggedInUser") || "Pari";
+    let sharvilScore = parseInt(localStorage.getItem("highscore_Sharvil")) || 0;
+    let pariScore = parseInt(localStorage.getItem("highscore_Pari")) || 0;
+
+    function updateScoreboard(player, playerScore, opponentScore) {
+      document.getElementById("current-player").textContent = player;
+      document.getElementById("your-highscore").textContent = playerScore;
+      document.getElementById("opponent-name").textContent = player === "Pari" ? "Sharvil" : "Pari";
+      document.getElementById("opponent-highscore").textContent = opponentScore;
+    }
+
+    if (currentUser === "Pari") {
+      updateScoreboard("Pari", pariScore, sharvilScore);
+    } else {
+      updateScoreboard("Sharvil", sharvilScore, pariScore);
+    }
+
+    function spawnBubble() {
+      const radius = 20 + Math.random() * 20;
+      const x = radius + Math.random() * (canvas.width - 2 * radius);
+      const y = canvas.height + radius;
+      const color = `hsl(${Math.random() * 360}, 80%, 70%)`;
+      bubbles.push({ x, y, radius, color });
+    }
+
+    function drawBubbles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let bubble of bubbles) {
+        ctx.beginPath();
+        ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+        ctx.fillStyle = bubble.color;
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
+
+    function updateBubbles() {
+      for (let bubble of bubbles) {
+        bubble.y -= bubbleSpeed;
+        if (bubble.y + bubble.radius < 0) {
+          endGame();
+        }
+      }
+    }
+
+    function handleClick(e) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      for (let i = 0; i < bubbles.length; i++) {
+        const b = bubbles[i];
+        const dist = Math.hypot(x - b.x, y - b.y);
+        if (dist < b.radius) {
+          bubbles.splice(i, 1);
+          score++;
+          bubbleSpeed += 0.03;
+          document.getElementById("live-score").textContent = score;
+          return;
+        }
+      }
+    }
+
+    function endGame() {
+      gameOver = true;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fff';
+      ctx.font = '32px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Game Over! Score: ${score}`, canvas.width / 2, canvas.height / 2);
+
+      if (currentUser === "Pari" && score > sharvilScore) {
+        let tokens = parseInt(localStorage.getItem("pariTokens")) || 0;
+        tokens++;
+        localStorage.setItem("pariTokens", tokens);
+        alert("You beat Sharvil's score! You earned 1 wish token!");
+      }
+
+      if (currentUser === "Pari" && score > pariScore) {
+        localStorage.setItem("highscore_Pari", score);
+        updateScoreboard("Pari", score, sharvilScore);
+      }
+      if (currentUser === "Sharvil" && score > sharvilScore) {
+        localStorage.setItem("highscore_Sharvil", score);
+        updateScoreboard("Sharvil", score, pariScore);
+      }
+    }
+
+    canvas.addEventListener('click', handleClick);
+
+    function gameLoop() {
+      if (!gameOver) {
+        updateBubbles();
+        drawBubbles();
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    setInterval(() => {
+      if (!gameOver) {
+        spawnBubble();
+      }
+    }, spawnInterval);
+
+    gameLoop();
+  </script>
+</body>
+</html>

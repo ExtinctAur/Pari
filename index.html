@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love 2.0 - Login</title>
+  <style>
+    body {
+      background: linear-gradient(to right, #ffafbd, #ffc3a0);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    input {
+      padding: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      width: 200px;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #fff;
+      color: #ff69b4;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Love 2.0</h1>
+  <p>As always, there's a login before the magic 💖</p>
+
+  <input type="text" id="username" placeholder="Username" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="checkLogin()">Login</button>
+
+  <script>
+    function checkLogin() {
+  const user = document.getElementById("username").value.toLowerCase();
+  const pass = document.getElementById("password").value;
+
+  if (user === "pari" && pass === "1 year") {
+    localStorage.setItem("loggedInUser", "Pari"); // <== FIXED
+    window.location.href = "main.html";
+  } else if (user === "sharvil" && pass === "123") {
+    localStorage.setItem("loggedInUser", "Sharvil"); // <== FIXED
+    window.location.href = "admin.html";
+  } else {
+    alert("Nope, wrong credentials. Try again cutie or mastermind.");
+  }
+}
+
+  </script>
+</body>
+</html>
