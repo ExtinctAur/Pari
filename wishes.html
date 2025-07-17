@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
+<script>
+  // Your Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCcdppTg2pJc9c0iOig_Hp6pDIDAL6_Kjs",
+  authDomain: "pari-ca0b5.firebaseapp.com",
+  projectId: "pari-ca0b5",
+  storageBucket: "pari-ca0b5.firebasestorage.app",
+  messagingSenderId: "426313475739",
+  appId: "1:426313475739:web:adcb0eb1570a593b62483e",
+  measurementId: "G-Y5TJF6Z0MK"
+};
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // Get Firestore
+  const db = firebase.firestore();
+</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wish Tokens</title>
