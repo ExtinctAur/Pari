@@ -1,61 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Love 2.0 - Login</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #ffdde1, #c2e9fb);
+      background: linear-gradient(to right, #ffafbd, #ffc3a0);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
-      margin: 0;
+      color: #fff;
     }
-
-    .login-box {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      text-align: center;
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
     }
-
     input {
-      padding: 0.75rem;
-      margin: 0.5rem 0;
-      width: 100%;
+      padding: 0.5rem;
+      border: none;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      width: 200px;
     }
-
     button {
-      padding: 0.75rem 1.5rem;
-      background-color: #e91e63;
-      color: white;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #fff;
+      color: #ff69b4;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      margin-top: 1rem;
-    }
-
-    h2 {
-      color: #e91e63;
+      font-weight: bold;
     }
   </style>
-</head>
-<body>
-  <div class="login-box">
-    <h2>Welcome to Love 2.0 💖</h2>
-    <input type="text" id="username" placeholder="Enter your username">
-    <button onclick="login()">Login</button>
-  </div>
-
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCcdppTg2pJc9c0iOig_Hp6pDIDAL6_Kjs",
@@ -69,19 +53,41 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+  </script>
+</head>
+<body>
+  <h1>Welcome to Love 2.0</h1>
+  <p>As always, there's a login before the magic 💖</p>
 
-    async function login() {
-      const username = document.getElementById('username').value.trim().toLowerCase();
-      if (!username) return alert("Please enter a username");
+  <input type="text" id="username" placeholder="Username" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="checkLogin()">Login</button>
 
-      const userRef = db.collection("tokens").doc(username);
-      const doc = await userRef.get();
-      if (!doc.exists) {
-        await userRef.set({ count: 0 });
+  <script>
+    async function checkLogin() {
+      const username = document.getElementById("username").value.toLowerCase();
+      const password = document.getElementById("password").value;
+
+      try {
+        const docRef = db.collection("users").doc(username);
+        const docSnap = await docRef.get();
+
+        if (docSnap.exists && docSnap.data().password === password) {
+          localStorage.setItem("currentUser", username);
+          localStorage.setItem("loggedInUser", username);
+
+          if (username === "sharvil") {
+            window.location.href = "admin.html";
+          } else {
+            window.location.href = "main.html";
+          }
+        } else {
+          alert("Nope, wrong credentials. Try again cutie or mastermind.");
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        alert("Something broke. And no, it's not just your dreams.");
       }
-
-      localStorage.setItem("currentUser", username);
-      window.location.href = "home.html";
     }
   </script>
 </body>
