@@ -87,21 +87,28 @@
     let tokenCount = 0;
 
     async function loadTokens() {
-      try {
-        const docRef = db.collection("tokens").doc(loggedInUser);
-        const docSnap = await docRef.get();
-        if (docSnap.exists) {
-          tokenCount = docSnap.data().count || 0;
-        } else {
-          tokenCount = 0;
-          await docRef.set({ count: 0 });
-        }
-        tokenDisplay.textContent = tokenCount;
-      } catch (err) {
-        console.error("Failed to load tokens:", err);
-        tokenDisplay.textContent = "?";
-      }
+  try {
+    console.log("Trying to load user:", loggedInUser);
+    const docRef = db.collection("tokens").doc(loggedInUser);
+    const docSnap = await docRef.get();
+    console.log("Document found?", docSnap.exists);
+
+    if (docSnap.exists) {
+      tokenCount = docSnap.data().count ?? 0;
+      console.log("Fetched token count:", tokenCount);
+    } else {
+      tokenCount = 0;
+      console.log("No doc found. Creating one.");
+      await docRef.set({ count: 0 });
     }
+
+    tokenDisplay.textContent = tokenCount;
+  } catch (err) {
+    console.error("loadTokens error:", err);
+    tokenDisplay.textContent = "?";
+  }
+}
+
 
     async function updateTokensInFirebase(newCount) {
       await db.collection("tokens").doc(loggedInUser).set({ count: newCount });
