@@ -2,26 +2,23 @@
 <html lang="en">
 <head>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
 
-<script>
-  // Your Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyCcdppTg2pJc9c0iOig_Hp6pDIDAL6_Kjs",
-  authDomain: "pari-ca0b5.firebaseapp.com",
-  projectId: "pari-ca0b5",
-  storageBucket: "pari-ca0b5.firebasestorage.app",
-  messagingSenderId: "426313475739",
-  appId: "1:426313475739:web:adcb0eb1570a593b62483e",
-  measurementId: "G-Y5TJF6Z0MK"
-};
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCcdppTg2pJc9c0iOig_Hp6pDIDAL6_Kjs",
+      authDomain: "pari-ca0b5.firebaseapp.com",
+      projectId: "pari-ca0b5",
+      storageBucket: "pari-ca0b5.firebasestorage.app",
+      messagingSenderId: "426313475739",
+      appId: "1:426313475739:web:adcb0eb1570a593b62483e",
+      measurementId: "G-Y5TJF6Z0MK"
+    };
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
 
-  // Get Firestore
-  const db = firebase.firestore();
-</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Love 2.0 - Main</title>
@@ -109,34 +106,27 @@ const firebaseConfig = {
     <p class="tagline">Built just for you, because you're the best part of my life.</p>
   </header>
 
-<section>
-  <a href="journey.html" class="link-card">
-    <div class="card" style="animation-delay: 0.3s">
-      <h2>Our Journey</h2>
-      <p>From the first message to now, every step with you has been magic❤️</p>
-    </div>
-  </a>
+  <section>
+    <a href="journey.html" class="link-card">
+      <div class="card" style="animation-delay: 0.3s">
+        <h2>Our Journey</h2>
+        <p>From the first message to now, every step with you has been magic❤️</p>
+      </div>
+    </a>
 
-  <a href="quiz.html" class="link-card">
-    <div class="card" style="animation-delay: 0.6s">
-      <h2>Mini Quiz</h2>
-      <p>Test how well you know us with a new quiz—just like last time, but even better. You'll probably ace it again lmaoo</p>
-    </div>
-  </a>
+    <a href="quiz.html" class="link-card">
+      <div class="card" style="animation-delay: 0.6s">
+        <h2>Mini Quiz</h2>
+        <p>Test how well you know us with a new quiz—just like last time, but even better. You'll probably ace it again lmaoo</p>
+      </div>
+    </a>
 
-  <a href="wishes.html" class="link-card">
-    <div class="card" style="animation-delay: 0.9s">
-      <h2>Wish Tokens</h2>
-      <p>You've earned a wish! Use a token to claim a reward from me 🎁</p>
-    </div>
-  </a>
-
-  <a href="minigame.html" class="link-card">
-    <div class="card" style="animation-delay: 1.2s">
-      <h2>Mini Game 🎮</h2>
-      <p>Let’s see who’s the boss 😈 Try to beat my score in this fun lil challenge!</p>
-    </div>
-  </a>
-</section>
+    <a href="wishes.html" class="link-card">
+      <div class="card" style="animation-delay: 0.9s">
+        <h2>Wish Tokens</h2>
+        <p>You've earned a wish! Use a token to claim a reward from me 🎁</p>
+      </div>
+    </a>
+  </section>
 </body>
 </html>
