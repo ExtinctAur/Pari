@@ -159,7 +159,7 @@
 
     const container = document.getElementById("wish-list");
     const tokenDisplay = document.getElementById("token-count");
-    const currentUser = localStorage.getItem("currentUser") || "pari";
+const currentUser = localStorage.getItem("loggedInUser") || "pari";
     let tokenCount = 0;
 
     async function loadTokens() {
