@@ -14,27 +14,29 @@
       align-items: center;
       height: 100vh;
       color: #fff;
-      text-align: center;
     }
+
     h1 {
       font-size: 2.5rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
     }
+
     p {
+      font-size: 1rem;
       margin-bottom: 1.5rem;
-      font-size: 1.1rem;
     }
+
     input {
       padding: 0.5rem;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
-      margin-bottom: 0.7rem;
+      margin-bottom: 0.5rem;
       width: 200px;
-      color: #333;
     }
+
     button {
-      margin-top: 0.5rem;
+      margin-top: 1rem;
       padding: 0.5rem 1rem;
       background-color: #fff;
       color: #ff69b4;
@@ -44,8 +46,10 @@
       font-weight: bold;
     }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
+  <!-- ✅ FIXED Firebase scripts for browser -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCcdppTg2pJc9c0iOig_Hp6pDIDAL6_Kjs",
@@ -71,33 +75,33 @@
 
   <script>
     async function checkLogin() {
-      const username = document.getElementById("username").value.toLowerCase().trim();
-      const password = document.getElementById("password").value.trim();
-
-      if (!username || !password) {
-        alert("Enter both fields. This isn’t a riddle.");
-        return;
-      }
+      const user = document.getElementById("username").value.toLowerCase();
+      const pass = document.getElementById("password").value;
 
       try {
-        const docRef = db.collection("users").doc(username);
+        const docRef = db.collection("users").doc(user);
         const docSnap = await docRef.get();
 
-        if (docSnap.exists && docSnap.data().password === password) {
-          localStorage.setItem("currentUser", username);
-          localStorage.setItem("loggedInUser", username);
+        if (docSnap.exists) {
+          const data = docSnap.data();
+          if (data.password === pass) {
+            localStorage.setItem("loggedInUser", user);
+            localStorage.setItem("currentUser", user);
 
-          if (username === "sharvil") {
-            window.location.href = "admin.html";
+            if (user === "sharvil") {
+              window.location.href = "admin.html";
+            } else {
+              window.location.href = "main.html";
+            }
           } else {
-            window.location.href = "main.html";
+            alert("Wrong password. Try again, brainiac.");
           }
         } else {
-          alert("Nope, wrong credentials. Try again, lovebird.");
+          alert("No such user. Did you spell your own name wrong?");
         }
       } catch (error) {
         console.error("Login failed:", error);
-        alert("Something broke. Try again later or blame the universe.");
+        alert("Something broke. Try again or blame the universe.");
       }
     }
   </script>
