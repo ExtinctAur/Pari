@@ -84,8 +84,8 @@
     let bubbleSpeed = 1.0;
 
     const currentUser = localStorage.getItem("currentUser") || "pari";
-    let currentUserDocRef = db.collection("users").doc(currentUser);
-    let opponent = currentUser === "pari" ? "sharvil" : "pari";
+    const currentUserDocRef = db.collection("users").doc(currentUser);
+    const opponent = currentUser === "pari" ? "sharvil" : "pari";
     let currentTokens = 0;
     let currentHigh = 0;
     let opponentHigh = 0;
@@ -195,8 +195,10 @@
       }
     }, spawnInterval);
 
-    loadScores();
-    gameLoop();
+    (async () => {
+      await loadScores();
+      gameLoop();
+    })();
   </script>
 </body>
 </html>
