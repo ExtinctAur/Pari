@@ -2,158 +2,201 @@
 <html lang="en">
 <head>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
 
-<script>
-  // Your Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyCcdppTg2pJc9c0iOig_Hp6pDIDAL6_Kjs",
-  authDomain: "pari-ca0b5.firebaseapp.com",
-  projectId: "pari-ca0b5",
-  storageBucket: "pari-ca0b5.firebasestorage.app",
-  messagingSenderId: "426313475739",
-  appId: "1:426313475739:web:adcb0eb1570a593b62483e",
-  measurementId: "G-Y5TJF6Z0MK"
-};
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCcdppTg2pJc9c0iOig_Hp6pDIDAL6_Kjs",
+      authDomain: "pari-ca0b5.firebaseapp.com",
+      projectId: "pari-ca0b5",
+      storageBucket: "pari-ca0b5.firebasestorage.app",
+      messagingSenderId: "426313475739",
+      appId: "1:426313475739:web:adcb0eb1570a593b62483e",
+      measurementId: "G-Y5TJF6Z0MK"
+    };
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-
-  // Get Firestore
-  const db = firebase.firestore();
-</script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel</title>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bubble Pop Showdown</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #c2e9fb, #ffdde1);
       margin: 0;
-      padding: 2rem;
-      color: #333;
-      text-align: center;
+      background: linear-gradient(to bottom right, #ff9a9e, #fad0c4);
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
-    h1 {
-      color: #e91e63;
-      margin-bottom: 1rem;
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background-color: #fff;
+      border-bottom: 4px solid #ff69b4;
     }
-
-    .token-display {
-      font-size: 1.5rem;
-      margin-bottom: 2rem;
-      color: #ff1493;
+    #scoreboard {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
     }
-
-    button {
-      padding: 0.75rem 1.5rem;
-      margin: 0.5rem;
-      font-size: 1rem;
-      background-color: #e91e63;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s ease-in-out;
-    }
-
-    button:hover {
-      background-color: #d81b60;
-    }
-
-    .log-section {
-      margin-top: 3rem;
-      text-align: left;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-      background: #fff;
-      padding: 1rem;
-      border-radius: 10px;
+    .score-block {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .log-section h2 {
-      color: #e91e63;
       text-align: center;
     }
-
-    ul#redeem-log {
-      list-style: none;
-      padding: 0;
+    .score-block h3 {
+      margin: 0 0 0.5rem;
+      color: #e91e63;
     }
-
-    ul#redeem-log li {
-      padding: 0.5rem;
-      border-bottom: 1px solid #ddd;
+    .score-block p {
+      font-size: 1.2rem;
+      margin: 0;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>Admin Control Panel 🔐</h1>
-  <p class="token-display">Current Tokens for Pari: <span id="token-count">0</span></p>
-  
-  <button onclick="addToken()">➕ Add Token</button>
-  <button onclick="removeToken()">➖ Remove Token</button>
-  <button onclick="resetTokens()">♻️ Reset Tokens</button>
-  <button onclick="goToMiniGame()">🎮 Play Mini Game</button>
-  <br><br>
-  <button onclick="goBack()">⬅️ Back to Login</button>
-
-  <div class="log-section">
-    <h2>Redemption Log 📜</h2>
-    <ul id="redeem-log"></ul>
+  <canvas id="gameCanvas" width="1000" height="640"></canvas>
+  <div id="scoreboard">
+    <div class="score-block" id="player-block">
+      <h3>You: <span id="current-player">Player</span></h3>
+      <p>Live Score: <span id="live-score">0</span></p>
+      <p>High Score: <span id="your-highscore">0</span></p>
+    </div>
+    <div class="score-block" id="opponent-block">
+      <h3>Opponent: <span id="opponent-name">Opponent</span></h3>
+      <p>High Score: <span id="opponent-highscore">0</span></p>
+    </div>
   </div>
 
   <script>
-    function updateDisplay() {
-      const tokens = parseInt(localStorage.getItem('pariTokens')) || 0;
-      document.getElementById('token-count').textContent = tokens;
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let bubbles = [];
+    let score = 0;
+    let gameOver = false;
+    let spawnInterval = 1000;
+    let bubbleSpeed = 1.0;
+
+    const currentUser = localStorage.getItem("currentUser") || "pari";
+    let currentUserDocRef = db.collection("users").doc(currentUser);
+    let opponent = currentUser === "pari" ? "sharvil" : "pari";
+    let currentTokens = 0;
+    let currentHigh = 0;
+    let opponentHigh = 0;
+
+    async function loadScores() {
+      const userDoc = await currentUserDocRef.get();
+      const oppDoc = await db.collection("users").doc(opponent).get();
+
+      currentHigh = userDoc.exists ? (userDoc.data().highscore || 0) : 0;
+      currentTokens = userDoc.exists ? (userDoc.data().tokens || 0) : 0;
+      opponentHigh = oppDoc.exists ? (oppDoc.data().highscore || 0) : 0;
+
+      updateScoreboard(currentUser, currentHigh, opponentHigh);
     }
 
-    function addToken() {
-      let tokens = parseInt(localStorage.getItem('pariTokens')) || 0;
-      tokens++;
-      localStorage.setItem('pariTokens', tokens);
-      updateDisplay();
+    function updateScoreboard(player, playerScore, opponentScore) {
+      document.getElementById("current-player").textContent = player;
+      document.getElementById("your-highscore").textContent = playerScore;
+      document.getElementById("opponent-name").textContent = opponent;
+      document.getElementById("opponent-highscore").textContent = opponentScore;
     }
 
-    function removeToken() {
-      let tokens = parseInt(localStorage.getItem('pariTokens')) || 0;
-      if (tokens > 0) tokens--;
-      localStorage.setItem('pariTokens', tokens);
-      updateDisplay();
+    function spawnBubble() {
+      for (let i = 0; i < 2; i++) {
+        const radius = 20 + Math.random() * 20;
+        const x = radius + Math.random() * (canvas.width - 2 * radius);
+        const y = canvas.height + radius;
+        const color = `hsl(${Math.random() * 360}, 80%, 70%)`;
+        bubbles.push({ x, y, radius, color });
+      }
     }
 
-    function resetTokens() {
-      localStorage.setItem('pariTokens', 0);
-      updateDisplay();
+    function drawBubbles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let bubble of bubbles) {
+        ctx.beginPath();
+        ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+        ctx.fillStyle = bubble.color;
+        ctx.fill();
+        ctx.closePath();
+      }
     }
 
-    function goToMiniGame() {
-      localStorage.setItem('currentUser', 'sharvil');
-      window.location.href = 'minigame.html';
+    function updateBubbles() {
+      for (let bubble of bubbles) {
+        bubble.y -= bubbleSpeed;
+        if (bubble.y + bubble.radius < 0) {
+          endGame();
+        }
+      }
     }
 
-    function goBack() {
-      localStorage.removeItem('currentUser');
-      window.location.href = 'index.html';
+    function handleClick(e) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      for (let i = 0; i < bubbles.length; i++) {
+        const b = bubbles[i];
+        const dist = Math.hypot(x - b.x, y - b.y);
+        if (dist < b.radius) {
+          bubbles.splice(i, 1);
+          score++;
+          bubbleSpeed += 0.02;
+          document.getElementById("live-score").textContent = score;
+          return;
+        }
+      }
     }
 
-    function loadRedemptionLog() {
-      const log = JSON.parse(localStorage.getItem('redemptionLog')) || [];
-      const ul = document.getElementById('redeem-log');
-      ul.innerHTML = log.length === 0 ? '<li>No wishes redeemed yet.</li>' : '';
-      log.reverse().forEach(entry => {
-        const li = document.createElement('li');
-        li.textContent = `${entry.date} — ${entry.wish} (${entry.cost} tokens)`;
-        ul.appendChild(li);
-      });
+    async function endGame() {
+      gameOver = true;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fff';
+      ctx.font = '32px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Game Over! Score: ${score}`, canvas.width / 2, canvas.height / 2);
+
+      if (currentUser === "pari" && score > opponentHigh) {
+        currentTokens++;
+        alert("You beat Sharvil's score! You earned 1 wish token!");
+      }
+
+      if (score > currentHigh) {
+        await currentUserDocRef.set({
+          highscore: score,
+          tokens: currentTokens
+        }, { merge: true });
+        updateScoreboard(currentUser, score, opponentHigh);
+      }
     }
 
-    updateDisplay();
-    loadRedemptionLog();
+    canvas.addEventListener('click', handleClick);
+
+    function gameLoop() {
+      if (!gameOver) {
+        updateBubbles();
+        drawBubbles();
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    setInterval(() => {
+      if (!gameOver) {
+        spawnBubble();
+      }
+    }, spawnInterval);
+
+    loadScores();
+    gameLoop();
   </script>
 </body>
 </html>
