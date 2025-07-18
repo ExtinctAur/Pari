@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCcdppTg2pJc9c0iOig_Hp6pDIDAL6_Kjs",
@@ -17,9 +20,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
   </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -84,7 +84,6 @@
   <button onclick="changeTokens(1)">➕ Add Token</button>
   <button onclick="changeTokens(-1)">➖ Remove Token</button>
   <button onclick="resetTokens()">♻ Reset Tokens</button>
-  <button onclick="goToMiniGame()">🎮 Play Mini Game</button>
   <br><br>
   <button onclick="goBack()">⬅ Back to Login</button>
 
@@ -98,41 +97,42 @@
     const docRef = db.collection("tokens").doc(user);
 
     async function fetchTokens() {
-      const snap = await docRef.get();
-      const count = snap.exists ? snap.data().count || 0 : 0;
-      document.getElementById('token-count').textContent = count;
-      return count;
+      try {
+        const snap = await docRef.get();
+        const count = snap.exists ? snap.data().count || 0 : 0;
+        document.getElementById("token-count").textContent = count;
+        return count;
+      } catch (err) {
+        console.error("Failed to fetch tokens:", err);
+        return 0;
+      }
     }
 
     async function changeTokens(delta) {
-      let current = await fetchTokens();
-      let newCount = Math.max(0, current + delta);
+      const current = await fetchTokens();
+      const newCount = Math.max(0, current + delta);
       await docRef.set({ count: newCount });
-      document.getElementById('token-count').textContent = newCount;
+      document.getElementById("token-count").textContent = newCount;
     }
 
     async function resetTokens() {
       await docRef.set({ count: 0 });
-      document.getElementById('token-count').textContent = 0;
-    }
-
-    function goToMiniGame() {
-      localStorage.setItem('currentUser', 'sharvil');
-      window.location.href = 'minigame.html';
+      document.getElementById("token-count").textContent = 0;
     }
 
     function goBack() {
-      localStorage.removeItem('currentUser');
-      window.location.href = 'index.html';
+      localStorage.removeItem("loggedInUser");
+      localStorage.removeItem("currentUser");
+      window.location.href = "index.html";
     }
 
     function loadRedemptionLog() {
-      const log = JSON.parse(localStorage.getItem('redemptionLog')) || [];
-      const ul = document.getElementById('redeem-log');
-      ul.innerHTML = log.length === 0 ? '<li>No wishes redeemed yet.</li>' : '';
+      const log = JSON.parse(localStorage.getItem("redemptionLog")) || [];
+      const ul = document.getElementById("redeem-log");
+      ul.innerHTML = log.length === 0 ? "<li>No wishes redeemed yet.</li>" : "";
       log.reverse().forEach(entry => {
-        const li = document.createElement('li');
-        li.textContent = ${entry.date} — ${entry.wish} (${entry.cost} tokens);
+        const li = document.createElement("li");
+        li.textContent = `${entry.date} — ${entry.wish} (${entry.cost} tokens)`;
         ul.appendChild(li);
       });
     }
