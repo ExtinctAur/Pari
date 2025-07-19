@@ -71,14 +71,25 @@
       list-style: none;
       padding: 0;
     }
-    ul#redeem-log li.completed {
-  color: #aaa;
-  text-decoration: line-through;
-}
-
     ul#redeem-log li {
       padding: 0.5rem;
       border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    ul#redeem-log li.completed {
+      color: gray;
+      text-decoration: line-through;
+    }
+    .tick-button {
+      background-color: #4caf50;
+      border: none;
+      color: white;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -97,80 +108,79 @@
     <ul id="redeem-log"></ul>
   </div>
 
- <script>
-  const user = "pari";
-  const docRef = db.collection("tokens").doc(user);
+  <script>
+    const user = "pari";
+    const docRef = db.collection("tokens").doc(user);
 
-  async function fetchTokens() {
-    try {
-      const snap = await docRef.get();
-      const count = snap.exists ? snap.data().count || 0 : 0;
-      document.getElementById("token-count").textContent = count;
-      return count;
-    } catch (err) {
-      console.error("Failed to fetch tokens:", err);
-      return 0;
-    }
-  }
-
-  async function changeTokens(delta) {
-    const current = await fetchTokens();
-    const newCount = Math.max(0, current + delta);
-    await docRef.set({ count: newCount });
-    document.getElementById("token-count").textContent = newCount;
-  }
-
-  async function resetTokens() {
-    await docRef.set({ count: 0 });
-    document.getElementById("token-count").textContent = 0;
-  }
-
-  function goBack() {
-    localStorage.removeItem("loggedInUser");
-    localStorage.removeItem("currentUser");
-    window.location.href = "index.html";
-  }
-
-  function toggleCompletion(index) {
-    const log = JSON.parse(localStorage.getItem("redemptionLog")) || [];
-    log[index].done = !log[index].done;
-    localStorage.setItem("redemptionLog", JSON.stringify(log));
-    loadRedemptionLog();
-  }
-
-  function loadRedemptionLog() {
-    const log = JSON.parse(localStorage.getItem("redemptionLog")) || [];
-    const ul = document.getElementById("redeem-log");
-    ul.innerHTML = log.length === 0 ? "<li>No wishes redeemed yet.</li>" : "";
-
-    log.reverse().forEach((entry, i) => {
-      const li = document.createElement("li");
-      li.style.display = "flex";
-      li.style.justifyContent = "space-between";
-      li.style.alignItems = "center";
-
-      const text = document.createElement("span");
-      text.innerHTML = `${entry.date} — ${entry.wish} (${entry.cost} tokens)`;
-      if (entry.done) {
-        text.style.color = "#888";
-        text.style.textDecoration = "line-through";
+    async function fetchTokens() {
+      try {
+        const snap = await docRef.get();
+        const count = snap.exists ? snap.data().count || 0 : 0;
+        document.getElementById("token-count").textContent = count;
+        return count;
+      } catch (err) {
+        console.error("Failed to fetch tokens:", err);
+        return 0;
       }
+    }
 
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = entry.done || false;
-      checkbox.title = "Mark as completed";
-      checkbox.onclick = () => toggleCompletion(log.length - 1 - i);
+    async function changeTokens(delta) {
+      const current = await fetchTokens();
+      const newCount = Math.max(0, current + delta);
+      await docRef.set({ count: newCount });
+      document.getElementById("token-count").textContent = newCount;
+    }
 
-      li.appendChild(text);
-      li.appendChild(checkbox);
-      ul.appendChild(li);
-    });
-  }
+    async function resetTokens() {
+      await docRef.set({ count: 0 });
+      document.getElementById("token-count").textContent = 0;
+    }
 
-  fetchTokens();
-  loadRedemptionLog();
-</script>
+    function goBack() {
+      localStorage.removeItem("loggedInUser");
+      localStorage.removeItem("currentUser");
+      window.location.href = "index.html";
+    }
 
+    async function loadRedemptionLog() {
+      const ul = document.getElementById("redeem-log");
+      ul.innerHTML = "";
+
+      try {
+        const snapshot = await db.collection("redemptions")
+          .where("user", "==", "pari")
+          .orderBy("date", "desc")
+          .get();
+
+        if (snapshot.empty) {
+          ul.innerHTML = "<li>No wishes redeemed yet.</li>";
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const entry = doc.data();
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <span>${entry.date} — ${entry.wish} (${entry.cost} tokens)</span>
+            <button class="tick-button" ${entry.done ? 'disabled' : ''}>✔</button>
+          `;
+          if (entry.done) li.classList.add("completed");
+
+          li.querySelector("button").addEventListener("click", async () => {
+            await db.collection("redemptions").doc(doc.id).update({ done: true });
+            li.classList.add("completed");
+            li.querySelector("button").disabled = true;
+          });
+
+          ul.appendChild(li);
+        });
+      } catch (err) {
+        console.error("Error loading redemption log:", err);
+      }
+    }
+
+    fetchTokens();
+    loadRedemptionLog();
+  </script>
 </body>
 </html>
