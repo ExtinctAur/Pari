@@ -210,20 +210,33 @@ const db = firebase.firestore();
     }
 
     async function redeem(name, cost) {
-      if (tokenCount >= cost) {
-        tokenCount -= cost;
-        await updateTokensInFirebase(tokenCount);
+  if (tokenCount >= cost) {
+    tokenCount -= cost;
+    await updateTokensInFirebase(tokenCount);
 
-        const log = JSON.parse(localStorage.getItem("redemptionLog")) || [];
-        const date = new Date().toLocaleString();
-        log.push({ wish: name, cost: cost, date: date });
-        localStorage.setItem("redemptionLog", JSON.stringify(log));
+    const date = new Date().toLocaleString();
+    const logEntry = {
+      wish: name,
+      cost: cost,
+      date: date,
+      user: loggedInUser,
+      done: false,
+    };
 
-        alert(`You redeemed "${name}"! Get ready 😏`);
-      } else {
-        alert("Not enough tokens, try the admin for a top-up! 🙃");
-      }
-    }
+    // Save to localStorage (for user-side continuity, optional now)
+    const log = JSON.parse(localStorage.getItem("redemptionLog")) || [];
+    log.push(logEntry);
+    localStorage.setItem("redemptionLog", JSON.stringify(log));
+
+    // 🔥 Save to Firestore
+    await db.collection("redemptions").add(logEntry);
+
+    alert(`You redeemed "${name}"! Get ready 😏`);
+  } else {
+    alert("Not enough tokens, try the admin for a top-up! 🙃");
+  }
+}
+
 
     wishes.forEach((wish) => {
       const div = document.createElement("div");
