@@ -215,27 +215,22 @@ const db = firebase.firestore();
     await updateTokensInFirebase(tokenCount);
 
     const date = new Date().toLocaleString();
-    const logEntry = {
+
+    // Add to Firestore instead of just localStorage
+    await db.collection("redemptions").add({
+      user: loggedInUser,
       wish: name,
       cost: cost,
       date: date,
-      user: loggedInUser,
-      done: false,
-    };
-
-    // Save to localStorage (for user-side continuity, optional now)
-    const log = JSON.parse(localStorage.getItem("redemptionLog")) || [];
-    log.push(logEntry);
-    localStorage.setItem("redemptionLog", JSON.stringify(log));
-
-    // 🔥 Save to Firestore
-    await db.collection("redemptions").add(logEntry);
+      done: false
+    });
 
     alert(`You redeemed "${name}"! Get ready 😏`);
   } else {
     alert("Not enough tokens, try the admin for a top-up! 🙃");
   }
 }
+
 
 
     wishes.forEach((wish) => {
