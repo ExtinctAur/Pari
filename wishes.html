@@ -221,7 +221,7 @@ const db = firebase.firestore();
       user: loggedInUser,
       wish: name,
       cost: cost,
-      date: date,
+      date: firebase.firestore.Timestamp.fromDate(new Date()),
       done: false
     });
 
