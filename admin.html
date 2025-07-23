@@ -109,78 +109,82 @@
   </div>
 
   <script>
-    const user = "pari";
-    const docRef = db.collection("tokens").doc(user);
+  const user = "pari";
+  const docRef = db.collection("tokens").doc(user);
 
-    async function fetchTokens() {
-      try {
-        const snap = await docRef.get();
-        const count = snap.exists ? snap.data().count || 0 : 0;
-        document.getElementById("token-count").textContent = count;
-        return count;
-      } catch (err) {
-        console.error("Failed to fetch tokens:", err);
-        return 0;
+  async function fetchTokens() {
+    try {
+      const snap = await docRef.get();
+      const count = snap.exists ? snap.data().count || 0 : 0;
+      document.getElementById("token-count").textContent = count;
+      return count;
+    } catch (err) {
+      console.error("Failed to fetch tokens:", err);
+      return 0;
+    }
+  }
+
+  async function changeTokens(delta) {
+    const current = await fetchTokens();
+    const newCount = Math.max(0, current + delta);
+    await docRef.set({ count: newCount });
+    document.getElementById("token-count").textContent = newCount;
+  }
+
+  async function resetTokens() {
+    await docRef.set({ count: 0 });
+    document.getElementById("token-count").textContent = 0;
+  }
+
+  function goBack() {
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("currentUser");
+    window.location.href = "index.html";
+  }
+
+  async function loadRedemptionLog() {
+    const ul = document.getElementById("redeem-log");
+    ul.innerHTML = "";
+
+    try {
+      const snapshot = await db.collection("redemptions")
+        .where("user", "==", user)
+        .orderBy("date", "desc")
+        .get();
+
+      if (snapshot.empty) {
+        ul.innerHTML = "<li>No wishes redeemed yet.</li>";
+        return;
       }
-    }
 
-    async function changeTokens(delta) {
-      const current = await fetchTokens();
-      const newCount = Math.max(0, current + delta);
-      await docRef.set({ count: newCount });
-      document.getElementById("token-count").textContent = newCount;
-    }
+      snapshot.forEach(docSnap => {
+        const entry = docSnap.data();
+        const li = document.createElement("li");
 
-    async function resetTokens() {
-      await docRef.set({ count: 0 });
-      document.getElementById("token-count").textContent = 0;
-    }
+        li.innerHTML = `
+          <span>${new Date(entry.date.seconds * 1000).toLocaleString()} — ${entry.wish} (${entry.cost} tokens)</span>
+          <button class="tick-button">✔</button>
+        `;
 
-    function goBack() {
-      localStorage.removeItem("loggedInUser");
-      localStorage.removeItem("currentUser");
-      window.location.href = "index.html";
-    }
-
-    async function loadRedemptionLog() {
-      const ul = document.getElementById("redeem-log");
-      ul.innerHTML = "";
-
-      try {
-        const snapshot = await db.collection("redemptions")
-          .where("user", "==", "pari")
-          .orderBy("date", "desc")
-          .get();
-
-        if (snapshot.empty) {
-          ul.innerHTML = "<li>No wishes redeemed yet.</li>";
-          return;
-        }
-
-        snapshot.forEach(doc => {
-          const entry = doc.data();
-          const li = document.createElement("li");
-          li.innerHTML = `
-            <span>${entry.date} — ${entry.wish} (${entry.cost} tokens)</span>
-            <button class="tick-button" ${entry.done ? 'disabled' : ''}>✔</button>
-          `;
-          if (entry.done) li.classList.add("completed");
-
-          li.querySelector("button").addEventListener("click", async () => {
-            await db.collection("redemptions").doc(doc.id).update({ done: true });
-            li.classList.add("completed");
-            li.querySelector("button").disabled = true;
-          });
-
-          ul.appendChild(li);
+        li.querySelector(".tick-button").addEventListener("click", async () => {
+          try {
+            await db.collection("redemptions").doc(docSnap.id).delete();
+            li.remove(); // visually remove the entry
+          } catch (err) {
+            console.error("Error deleting redemption:", err);
+          }
         });
-      } catch (err) {
-        console.error("Error loading redemption log:", err);
-      }
-    }
 
-    fetchTokens();
-    loadRedemptionLog();
-  </script>
+        ul.appendChild(li);
+      });
+    } catch (err) {
+      console.error("Error loading redemption log:", err);
+    }
+  }
+
+  fetchTokens();
+  loadRedemptionLog();
+</script>
+
 </body>
 </html>
