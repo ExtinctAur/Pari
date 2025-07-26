@@ -218,10 +218,13 @@ const db = firebase.firestore();
 
     // Add to Firestore instead of just localStorage
 await db.collection("redemptions").add({
-  user: loggedInUser,
+console.log("Redemption saved to Firestore:", {
+  user: loggedInUser.toLowerCase().trim(),
   wish: name,
   cost: cost,
   date: firebase.firestore.Timestamp.fromDate(new Date())
+});
+
 });
 
 
