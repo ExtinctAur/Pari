@@ -236,10 +236,11 @@ alert(`You redeemed "${name}"! Get ready 😏`);
     wishes.forEach((wish) => {
       const div = document.createElement("div");
       div.className = "wish";
-      div.innerHTML = 
-        <div><strong>${wish.name}</strong><br>Cost: ${wish.cost} tokens</div>
-        <button onclick="redeem('${wish.name}', ${wish.cost})">Redeem</button>
-      ;
+div.innerHTML = `
+  <div><strong>${wish.name}</strong><br>Cost: ${wish.cost} tokens</div>
+  <button onclick="redeem('${wish.name}', ${wish.cost})">Redeem</button>
+`;
+
       container.appendChild(div);
     });
 
