@@ -218,17 +218,14 @@ const db = firebase.firestore();
 
     // Add to Firestore instead of just localStorage
 await db.collection("redemptions").add({
-console.log("Redemption saved to Firestore:", {
-  user: loggedInUser.toLowerCase().trim(),
+  user: loggedInUser,
   wish: name,
   cost: cost,
   date: firebase.firestore.Timestamp.fromDate(new Date())
 });
 
-});
 
-
-    alert(`You redeemed "${name}"! Get ready 😏`);
+    alert(You redeemed "${name}"! Get ready 😏);
   } else {
     alert("Not enough tokens, try the admin for a top-up! 🙃");
   }
@@ -239,10 +236,10 @@ console.log("Redemption saved to Firestore:", {
     wishes.forEach((wish) => {
       const div = document.createElement("div");
       div.className = "wish";
-      div.innerHTML = `
+      div.innerHTML = 
         <div><strong>${wish.name}</strong><br>Cost: ${wish.cost} tokens</div>
         <button onclick="redeem('${wish.name}', ${wish.cost})">Redeem</button>
-      `;
+      ;
       container.appendChild(div);
     });
 
