@@ -217,13 +217,13 @@ const db = firebase.firestore();
     const date = new Date().toLocaleString();
 
     // Add to Firestore instead of just localStorage
-    await db.collection("redemptions").add({
-      user: loggedInUser,
-      wish: name,
-      cost: cost,
-      date: firebase.firestore.Timestamp.fromDate(new Date()),
-      done: false
-    });
+await db.collection("redemptions").add({
+  user: loggedInUser,
+  wish: name,
+  cost: cost,
+  date: firebase.firestore.Timestamp.fromDate(new Date())
+});
+
 
     alert(`You redeemed "${name}"! Get ready 😏`);
   } else {
